@@ -1,5 +1,6 @@
 import random
 import streamlit as st
+from logic_utils import parse_guess, reset_game, attempts_left
 
 def get_range_for_difficulty(difficulty: str):
     if difficulty == "Easy":
@@ -9,24 +10,6 @@ def get_range_for_difficulty(difficulty: str):
     if difficulty == "Hard":
         return 1, 50
     return 1, 100
-
-
-def parse_guess(raw: str):
-    if raw is None:
-        return False, None, "Enter a guess."
-
-    if raw == "":
-        return False, None, "Enter a guess."
-
-    try:
-        if "." in raw:
-            value = int(float(raw))
-        else:
-            value = int(raw)
-    except Exception:
-        return False, None, "That is not a number."
-
-    return True, value, None
 
 
 def check_guess(guess, secret):
@@ -106,10 +89,20 @@ if "history" not in st.session_state:
 
 st.subheader("Make a guess")
 
-st.info(
-    f"Guess a number between 1 and 100. "
-    f"Attempts left: {attempt_limit - st.session_state.attempts}"
-)
+if st.session_state.pop("just_reset", False):
+    st.success("New Game Started")
+
+attempts_slot = st.empty()
+
+
+def render_attempts_label():
+    attempts_slot.info(
+        f"Guess a number between 1 and 100. "
+        f"Attempts left: {attempts_left(attempt_limit, st.session_state.attempts)}"
+    )
+
+
+render_attempts_label()
 
 with st.expander("Developer Debug Info"):
     st.write("Secret:", st.session_state.secret)
@@ -131,11 +124,27 @@ with col2:
 with col3:
     show_hint = st.checkbox("Show hint", value=True)
 
+# FIXME: Logic breaks here
+
 if new_game:
-    st.session_state.attempts = 0
-    st.session_state.secret = random.randint(1, 100)
-    st.success("New game started.")
-    st.rerun()
+    st.session_state.confirm_new_game = True
+
+if st.session_state.get("confirm_new_game"):
+    st.warning("Are you sure you want to start a new game? Current progress will be lost.")
+    yes_col, no_col, _ = st.columns([1, 1, 4])
+    with yes_col:
+        st.button(
+            "Yes, start over",
+            on_click=reset_game,
+            args=(st.session_state, low, high, difficulty),
+        )
+    with no_col:
+        st.button(
+            "Cancel",
+            on_click=lambda: st.session_state.update(confirm_new_game=False),
+        )
+
+    
 
 if st.session_state.status != "playing":
     if st.session_state.status == "won":
@@ -147,7 +156,7 @@ if st.session_state.status != "playing":
 if submit:
     st.session_state.attempts += 1
 
-    ok, guess_int, err = parse_guess(raw_guess)
+    ok, guess_int, err = parse_guess(raw_guess, low, high)
 
     if not ok:
         st.session_state.history.append(raw_guess)
@@ -186,6 +195,9 @@ if submit:
                     f"The secret was {st.session_state.secret}. "
                     f"Score: {st.session_state.score}"
                 )
+
+    # Redraw so the label reflects the attempt that was just used.
+    render_attempts_label()
 
 st.divider()
 st.caption("Built by an AI that claims this code is production-ready.")
