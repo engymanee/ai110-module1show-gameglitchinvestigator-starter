@@ -41,35 +41,34 @@ Game Glitch Investigator is a number-guessing game built with Streamlit. The app
 - **Attempts label (bug 3):** moved the calculation into `attempts_left()` in `logic_utils.py`. `app.py` imports it and draws the label into a placeholder (`st.empty()`), then redraws it after the guess is processed so it shows the updated count.
 - **Out-of-range guesses (bug 4):** moved `parse_guess` into `logic_utils.py` (only the import remains in `app.py`) and added `low`/`high` parameters. Guesses outside the difficulty's range are rejected with "Please enter a number between {low} and {high}." and no longer count as a valid guess.
 - **New Game (bug 5):** clicking "New Game" now asks "Are you sure?". Confirming calls `reset_game()` in `logic_utils.py`, which picks a new secret, resets attempts, score, status and history, clears the input box, and shows "New Game Started". Cancel dismisses the prompt without changing anything.
+- **Wrong hints (1 and 2):** moved `check_guess` into `logic_utils.py` (only the import remains in `app.py`). The hints were swapped, so a too-high guess now says "Go LOWER!" and a too-low guess says "Go HIGHER!". It now returns just the outcome ("Win", "Too High" or "Too Low"), and a new `get_hint()` gives the message. I also removed the even-attempt `str(secret)` conversion that broke the comparison.
 
 ## 📸 Demo Walkthrough
 
 Describe your fixed game in numbered steps so a reader can follow along without watching a video:
 
-1. <!User enters a number -->
-2. <!App checks if it is actually between 1 and 100 -->
-3. <!User clicks on end game-->
-4. <!App prompts the user to confirm they want to end and actually restarts -->
-5. <!User enters a number -->
-6. <!The label text accurately tells the user the actual number of steps -->
+1. <!-- Enter a number -->
+2. <!-- App checks it is between 1 and 100 -->
+3. <!-- Click "New Game" -->
+4. <!-- App asks "Are you sure?" and restarts when you confirm -->
+5. <!-- Enter another number -->
+6. <!-- The attempts label shows the correct number left -->
+7. <!-- Guess a number higher or lower than the secret -->
+8. <!-- The hint is correct: "Go LOWER!" if too high, "Go HIGHER!" if too low -->
 
 
-**Screenshot** *(optional)*: <!-- Insert a screenshot of your fixed, winning game here -->
+**Screenshot** *(optional)*: 
+
+![alt text](image.png)
+![alt text](image-1.png)
 
 ## 🧪 Test Results
-
-```
-platform darwin -- Python 3.13.15, pytest-9.1.1, pluggy-1.6.0
-rootdir: /Users/maneengozinnamani/Desktop/CodePath Projects/ai110-module1show-gameglitchinvestigator-starter
-plugins: anyio-4.15.1
-collected 8 items                                                                                                                                                           
 
 tests/test_game_logic.py ........                                                                                                                                     [100%]
 
 ============================================================================= 8 passed in 0.01s =============================================================================
 maneengozinnamani@Mac ai110-module1show-gameglitchinvestigator-starter % 
 
-```
 
 ## 🚀 Stretch Features
 
