@@ -47,13 +47,37 @@ def attempts_left(attempt_limit: int, attempts_used: int) -> int:
     return max(attempt_limit - attempts_used, 0)
 
 
-def check_guess(guess, secret):
-    """
-    Compare guess to secret and return (outcome, message).
+# Fix: check_guess was moved here from app.py. Three bugs were fixed:
+# 1) the hints were backwards (a too-high guess said "Go HIGHER!"), so they now
+#    say "Go LOWER!" for a too-high guess and "Go HIGHER!" for a too-low guess;
+# 2) it now returns only the outcome string ("Win" / "Too High" / "Too Low") so it
+#    matches the tests, and the message comes from get_hint();
+# 3) the str() fallback that compared guesses as text (so "9" > "50") was removed,
+#    because the secret is always an int now.
+# I selected the failing tests and asked AI to fix the function, move it here and
+# import it in app.py.
 
-    outcome examples: "Win", "Too High", "Too Low"
+def check_guess(guess: int, secret: int) -> str:
     """
-    raise NotImplementedError("Refactor this function from app.py into logic_utils.py")
+    Compare guess to secret and return the outcome.
+
+    outcome: "Win", "Too High", or "Too Low"
+    """
+    if guess == secret:
+        return "Win"
+    if guess > secret:
+        return "Too High"
+    return "Too Low"
+
+
+def get_hint(outcome: str) -> str:
+    """Return the player-facing hint message for an outcome."""
+    hints = {
+        "Win": "🎉 Correct!",
+        "Too High": "📉 Go LOWER!",
+        "Too Low": "📈 Go HIGHER!",
+    }
+    return hints.get(outcome, "")
 
 
 def update_score(current_score: int, outcome: str, attempt_number: int):

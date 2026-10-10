@@ -45,6 +45,12 @@ Document at least 3 bugs you found. Add rows as needed.
    - **Actual behavior:** Nothing happened.
    - **Console output / error:** N/A
 
+4. **Hints are backwards and wrong on some attempts**
+   - **Input:** Guessed a number higher than the secret (e.g. 60 when the secret was 50), and later guessed on even-numbered attempts.
+   - **Expected behavior:** A too-high guess should say "Go LOWER!" and a too-low guess should say "Go HIGHER!", on every attempt.
+   - **Actual behavior:** The hints were swapped, and on every second attempt the hint was sometimes wrong even when the direction was right.
+   - **Console output / error:** N/A (the `check_guess` tests also failed because the function returned a tuple instead of "Win" / "Too High" / "Too Low").
+
 ---
 
 ## 2. How did you use AI as a teammate?
@@ -61,15 +67,19 @@ Document at least 3 bugs you found. Add rows as needed.
 ## 3. Debugging and testing your fixes
 
 - How did you decide whether a bug was really fixed?
+# I repeated the exact steps that caused the bug (like entering 0, or guessing too high) and checked the game behaved correctly. For the logic bugs I also ran pytest to confirm.
 - Describe at least one test you ran (manual or using pytest)  
   and what it showed you about your code.
+# I ran test_guess_too_high (secret 50, guess 60 should give "Too High"). It failed at first because check_guess returned a tuple with a message instead of just the outcome. That showed me the function was doing two jobs, so I split the hint message into its own function.
 - Did AI help you design or understand any tests? How?
+# Yes. I gave it the failing tests and it explained why they failed, then fixed the code to match them.
 
 ---
 
 ## 4. What did you learn about Streamlit and state?
 
 - How would you explain Streamlit "reruns" and session state to a friend who has never used Streamlit?
+# Every time you click a button or type something, Streamlit re-runs the whole script from top to bottom, like refreshing the page. Normal variables get wiped on each run, so session state is the app's memory: anything stored there (the secret number, attempts, score) survives between reruns.
 
 ---
 
@@ -77,5 +87,8 @@ Document at least 3 bugs you found. Add rows as needed.
 
 - What is one habit or strategy from this project that you want to reuse in future labs or projects?
   - This could be a testing habit, a prompting strategy, or a way you used Git.
+# Writing down the exact steps to reproduce a bug before asking AI to fix it, and having tests to check the fix afterward.
 - What is one thing you would do differently next time you work with AI on a coding task?
+# Ask to see the code before it is applied, and check the result myself instead of trusting that it did exactly what I asked.
 - In one or two sentences, describe how this project changed the way you think about AI generated code.
+# AI generated code can look finished and still be full of bugs, so it needs testing and review like any other code. AI is a helpful teammate, but I'm still the one responsible for checking it.

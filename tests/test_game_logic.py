@@ -1,4 +1,4 @@
-rfrom logic_utils import check_guess, parse_guess, reset_game
+from logic_utils import attempts_left, check_guess, parse_guess, reset_game
 
 def test_winning_guess():
     # If the secret is 50 and guess is 50, it should be a win
@@ -28,8 +28,7 @@ def test_parse_guess_accepts_in_range_bounds():
     assert parse_guess("1", 1, 100) == (True, 1, None)
     assert parse_guess("100", 1, 100) == (True, 100, None)
 
-
-# Bug 2: New Game only reset attempts/secret and ignored the difficulty range
+# Bug 2: New Game only reset attempts
 class FakeState(dict):
     """Mimics st.session_state: supports both attribute and key access."""
     __getattr__ = dict.__getitem__
@@ -50,3 +49,15 @@ def test_reset_game_refreshes_everything():
     assert state["guess_input_Easy"] == ""
     assert state.confirm_new_game is False
     assert state.just_reset is True
+
+
+# Bug 3: "Attempts left" label did not update after a guess (it showed the old count)
+def test_attempts_left_decreases_after_each_guess():
+    # Normal difficulty allows 8 attempts; the counter starts at 1.
+    assert attempts_left(8, 1) == 7
+    assert attempts_left(8, 2) == 6
+    assert attempts_left(8, 3) == 5
+
+def test_attempts_left_never_negative():
+    assert attempts_left(8, 8) == 0
+    assert attempts_left(8, 12) == 0
